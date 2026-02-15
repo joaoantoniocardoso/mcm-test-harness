@@ -1,0 +1,90 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ab-harness"
+version = "0.1.0"
+description = "A/B Test Harness for MCM Pipeline Analysis Stats"
+requires-python = ">=3.10"
+dependencies = [
+    # Core
+    "matplotlib>=3.7",
+    "pandas>=2.0,<3",
+    "numpy>=1.24",
+    "jinja2>=3.1",
+    "scipy>=1.10",
+    "pyyaml>=6.0",
+    # Statistical testing
+    "setuptools<82",
+    "spotify-confidence==4.0.0",
+    "msprt @ file:libs/msprt",
+    # Stream clients (after installing, also run: playwright install chromium)
+    "playwright>=1.40",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.0",
+    "ruff>=0.9.0",
+    "pre-commit>=3.0",
+    "pandas-stubs",
+    "types-PyYAML",
+    "types-jinja2",
+]
+
+[project.scripts]
+ab-harness = "ab_harness.cli:main"
+
+# ---------------------------------------------------------------------------
+# Tool configuration
+# ---------------------------------------------------------------------------
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+target-version = "py310"
+line-length = 99
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "RUF012"]
+"libs/msprt/tests/*" = ["S101", "RUF012"]
+"ab_harness/report.py" = ["E501"]
+"ab_harness/cli.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "spotify_confidence.*",
+    "scipy.*",
+    "matplotlib.*",
+    "playwright.*",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source_pkgs = ["msprt", "ab_harness"]
+
+[tool.coverage.paths]
+msprt = [
+    "libs/msprt/src/msprt",
+    "*/site-packages/msprt",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "libs/msprt/tests"]
+addopts = "-v --tb=short -m 'not slow'"
+markers = [
+    "slow: Monte Carlo simulations and other long-running tests (run with: pytest -m slow)",
+]

@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install project with dev deps
+        run: pip install -e ".[dev]"
+
+      - name: Run ruff lint
+        run: ruff check .
+
+      - name: Run ruff format check
+        run: ruff format --check .
+
+      - name: Run mypy
+        run: mypy ab_harness/ libs/msprt/src/
+
+      - name: Run pytest (fast) with coverage
+        run: pytest --tb=short -q --cov=ab_harness --cov=libs/msprt/src/msprt --cov-report=term-missing
+
+      - name: Run pytest (slow -- Monte Carlo validation) with coverage
+        run: >
+          pytest --tb=short -q -m slow
+          --cov=ab_harness --cov=libs/msprt/src/msprt
+          --cov-append --cov-report=term-missing
+          --cov-fail-under=20

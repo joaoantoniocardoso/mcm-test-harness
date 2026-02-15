@@ -1,0 +1,26 @@
+# A/B test run data (large JSON series, charts, reports)
+runs/
+
+# Python virtual environments
+.venv*/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Batch state files
+_batch_state_*.json
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+configs/
+patches/
